@@ -50,3 +50,17 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Claude Code
+.claude/
+
+# Test scripts and results
+test_encoding.py
+test_search.py
+debug_html.py
+encoding_debug.txt
+search_test_results.txt
+
+# Backup files
+*_old.py
+*.backup

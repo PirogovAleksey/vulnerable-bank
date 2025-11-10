@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подати заявку на кредит - Vulnerable Bank</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 1.8em;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .navbar-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .loan-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .card-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-hint {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .loan-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .loan-type {
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .loan-type:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .loan-type.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .loan-type-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .loan-type-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .vulnerability-warning {
+            margin-top: 30px;
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .vulnerability-warning h4 {
+            color: #721c24;
+            margin-bottom: 10px;
+        }
+
+        .vulnerability-warning code {
+            background: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            color: #dc3545;
+        }
+
+        .exploit-example {
+            background: #343a40;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-content">
+            <h1>🏦 Vulnerable Bank</h1>
+            <div class="navbar-links">
+                <a href="/dashboard">📊 Панель</a>
+                <a href="/my_loans">💰 Мої кредити</a>
+                <a href="/logout">Вийти</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="loan-card">
+            <h2 class="card-title">💰 Подати заявку на кредит</h2>
+            <p class="card-subtitle">Заповніть форму нижче</p>
+
+            <form method="POST" action="/apply_loan" id="loanForm">
+                <h3 style="margin-bottom: 15px;">Виберіть тип кредиту</h3>
+                <div class="loan-types">
+                    <div class="loan-type" onclick="selectLoanType('personal')">
+                        <div class="loan-type-icon">👤</div>
+                        <div class="loan-type-name">Особистий</div>
+                    </div>
+                    <div class="loan-type" onclick="selectLoanType('mortgage')">
+                        <div class="loan-type-icon">🏠</div>
+                        <div class="loan-type-name">Іпотека</div>
+                    </div>
+                    <div class="loan-type" onclick="selectLoanType('auto')">
+                        <div class="loan-type-icon">🚗</div>
+                        <div class="loan-type-name">Автокредит</div>
+                    </div>
+                    <div class="loan-type" onclick="selectLoanType('business')">
+                        <div class="loan-type-icon">💼</div>
+                        <div class="loan-type-name">Бізнес</div>
+                    </div>
+                </div>
+                <input type="hidden" name="loan_type" id="loan_type" value="personal">
+
+                <div class="form-group">
+                    <label for="amount">Сума кредиту (₴)</label>
+                    <input type="number" id="amount" name="amount" step="0.01" placeholder="10000.00" required>
+                    <div class="form-hint">Введіть бажану суму кредиту</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="purpose">Мета кредиту</label>
+                    <textarea id="purpose" name="purpose" placeholder="Опишіть для чого потрібен кредит..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">📤 Подати заявку</button>
+            </form>
+
+            <div class="vulnerability-warning">
+                <h4>🔓 VULNERABILITY: Business Logic Flaw</h4>
+                <p style="margin-bottom: 10px;">Цей endpoint має вразливість бізнес-логіки:</p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>Відсутня валідація мінімальної/максимальної суми</li>
+                    <li><strong>Можна ввести від'ємну суму!</strong></li>
+                    <li>Можна отримати гроші від банку замість позики</li>
+                </ul>
+
+                <h5 style="margin-top: 15px; margin-bottom: 10px;">Приклад експлойту:</h5>
+                <div class="exploit-example">
+# Подати заявку на "кредит" з від'ємною сумою
+amount = -100000.00  # Банк заплатить ВАМ!
+
+curl -X POST http://localhost:8080/apply_loan \
+  -H "Cookie: session=your_session_cookie" \
+  -d "loan_type=personal" \
+  -d "amount=-100000.00" \
+  -d "purpose=Business logic exploit"
+
+# Або використайте DevTools у браузері:
+# 1. Відкрийте консоль (F12)
+# 2. Введіть: document.getElementById('amount').value = '-100000'
+# 3. Натисніть "Подати заявку"
+                </div>
+
+                <p style="margin-top: 15px; color: #721c24;">
+                    <strong>Очікуваний результат:</strong> Система прийме заявку з від'ємною сумою,
+                    що може призвести до того, що банк буде винен вам гроші!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectLoanType(type) {
+            // Remove selected class from all
+            document.querySelectorAll('.loan-type').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Add selected to clicked
+            event.target.closest('.loan-type').classList.add('selected');
+
+            // Update hidden input
+            document.getElementById('loan_type').value = type;
+        }
+
+        // VULNERABILITY: No client-side validation for negative numbers
+        document.getElementById('loanForm').addEventListener('submit', function(e) {
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            // This check can be bypassed easily
+            if (isNaN(amount)) {
+                e.preventDefault();
+                alert('Введіть коректну суму');
+            }
+
+            // Note: No check for negative values!
+        });
+
+        // Auto-select personal loan by default
+        document.querySelector('.loan-type').classList.add('selected');
+
+        // Add helpful console message
+        console.log("🔓 VULNERABILITY HINT:");
+        console.log("Try submitting a negative loan amount!");
+        console.log("Example: document.getElementById('amount').value = '-100000'");
+    </script>
+</body>
+</html>

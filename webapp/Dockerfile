@@ -18,6 +18,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY . .
 
+# Create directories for uploads and documents
+RUN mkdir -p /app/uploads/avatars
+RUN mkdir -p /app/documents/statements
+RUN mkdir -p /app/documents/contracts
+RUN mkdir -p /app/documents/receipts
+RUN mkdir -p /app/documents/admin
+RUN chmod -R 777 /app/uploads
+RUN chmod -R 777 /app/documents
+
 # Expose port
 EXPOSE 5000
 
