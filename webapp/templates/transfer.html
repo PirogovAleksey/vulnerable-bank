@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Переказ коштів - Vulnerable Bank</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 1.8em;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .navbar-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .transfer-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .card-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-hint {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn-transfer {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-transfer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-transfer:active {
+            transform: translateY(0);
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c3e6cb;
+        }
+
+        .quick-transfer {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .quick-transfer h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .quick-accounts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .quick-account {
+            padding: 12px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-account:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .quick-account-number {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .quick-account-name {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .vulnerability-warning {
+            margin-top: 30px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .vulnerability-warning h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .vulnerability-warning ul {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .vulnerability-warning li {
+            margin-bottom: 5px;
+        }
+
+        .vulnerability-warning code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-content">
+            <h1>🏦 Vulnerable Bank</h1>
+            <div class="navbar-links">
+                <a href="/dashboard">📊 Панель</a>
+                <a href="/logout">Вийти</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="transfer-card">
+            <h2 class="card-title">💸 Переказ коштів</h2>
+            <p class="card-subtitle">Введіть деталі переказу нижче</p>
+
+            {% if error %}
+            <div class="error">
+                <strong>Помилка:</strong> {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/transfer" id="transferForm">
+                <div class="form-group">
+                    <label for="to_account">Рахунок одержувача</label>
+                    <input type="text" id="to_account" name="to_account"
+                           placeholder="1000000003" required>
+                    <div class="form-hint">Введіть номер рахунку одержувача (10 цифр)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Сума переказу (₴)</label>
+                    <input type="number" id="amount" name="amount"
+                           min="0.01" step="0.01" placeholder="100.00" required>
+                    <div class="form-hint">Мінімальна сума: ₴0.01</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Опис платежу (необов'язково)</label>
+                    <textarea id="description" name="description"
+                              placeholder="Повернення боргу, оплата послуг, тощо..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-transfer">Підтвердити переказ</button>
+            </form>
+
+            <div class="quick-transfer">
+                <h3>⚡ Швидкий переказ</h3>
+                <div class="quick-accounts">
+                    <div class="quick-account" onclick="fillAccount('1000000002', 'john')">
+                        <div class="quick-account-number">1000000002</div>
+                        <div class="quick-account-name">John (користувач)</div>
+                    </div>
+                    <div class="quick-account" onclick="fillAccount('1000000003', 'jane')">
+                        <div class="quick-account-number">1000000003</div>
+                        <div class="quick-account-name">Jane (користувач)</div>
+                    </div>
+                    <div class="quick-account" onclick="fillAccount('1000000004', 'bob')">
+                        <div class="quick-account-number">1000000004</div>
+                        <div class="quick-account-name">Bob (користувач)</div>
+                    </div>
+                    <div class="quick-account" onclick="fillAccount('1000000005', 'alice')">
+                        <div class="quick-account-number">1000000005</div>
+                        <div class="quick-account-name">Alice (касир)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vulnerability-warning">
+                <h4>🔓 Підказки для експлуатації Race Condition:</h4>
+                <ul>
+                    <li>Відправте багато одночасних запитів переказу</li>
+                    <li>Використайте <code>curl</code> або Burp Suite Intruder</li>
+                    <li>Перевірте баланс після атаки - можливий від'ємний баланс!</li>
+                    <li>Python приклад:
+                        <pre style="background: white; padding: 10px; border-radius: 5px; margin-top: 10px;">
+import requests
+from concurrent.futures import ThreadPoolExecutor
+
+def transfer():
+    requests.post('http://localhost:5000/transfer',
+                  data={'to_account': '1000000003',
+                        'amount': '100',
+                        'description': 'Race condition test'})
+
+with ThreadPoolExecutor(max_workers=10) as executor:
+    for _ in range(20):
+        executor.submit(transfer)
+                        </pre>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function fillAccount(accountNumber, name) {
+            document.getElementById('to_account').value = accountNumber;
+            document.getElementById('description').value = 'Переказ для ' + name;
+        }
+
+        // VULNERABILITY: No CSRF protection!
+        // Form can be submitted from any external site
+
+        document.getElementById('transferForm').addEventListener('submit', function(e) {
+            const amount = parseFloat(document.getElementById('amount').value);
+            if (amount <= 0) {
+                e.preventDefault();
+                alert('Сума повинна бути більше 0');
+            }
+        });
+    </script>
+</body>
+</html>

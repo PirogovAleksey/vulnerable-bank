@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід - Vulnerable Bank</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .test-accounts {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-accounts h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .test-accounts code {
+            display: block;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .warning {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+        }
+
+        .warning h4 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .warning p {
+            color: #856404;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        .tips {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            border-radius: 5px;
+        }
+
+        .tips h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+
+        .tips ul {
+            margin-left: 20px;
+            color: #0c5460;
+        }
+
+        .tips li {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🏦 Vulnerable Bank</h1>
+            <p>Навчальна банківська система</p>
+        </div>
+
+        {% if error %}
+        <div class="error">
+            <strong>Помилка:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <div class="form-group">
+                <label for="username">Логін</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn-login">Увійти</button>
+        </form>
+
+        <div class="test-accounts">
+            <h3>📝 Тестові акаунти для перевірки:</h3>
+            <code>admin / admin123 (адміністратор)</code>
+            <code>john / password (звичайний користувач)</code>
+            <code>jane / 123456 (звичайний користувач)</code>
+            <code>alice / letmein (касир)</code>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Увага!</h4>
+            <p>Це навмисно вразлива банківська система, створена для навчання кібербезпеки.
+            <strong>НЕ ВИКОРИСТОВУЙТЕ</strong> реальні паролі або конфіденційну інформацію!</p>
+        </div>
+
+        <div class="tips">
+            <h4>💡 Підказки для тестування:</h4>
+            <ul>
+                <li>Спробуйте SQL ін'єкцію в полях логіну</li>
+                <li>Перевірте XSS в полях пошуку</li>
+                <li>Досліджуйте API endpoints</li>
+                <li>Перевірте IDOR уразливості</li>
+                <li>Спробуйте атаки race condition на трансфери</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
