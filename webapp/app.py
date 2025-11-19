@@ -155,11 +155,15 @@ def login():
                 cursor.execute(f"UPDATE users SET last_login=NOW() WHERE id={user['id']}")
                 conn.commit()
 
+                cursor.close()
+                conn.close()
+
+                # Log successful login
+                log_action(user['id'], 'USER_LOGIN', None, f"Successful login for {user['username']}")
+
                 response = make_response(redirect(url_for('dashboard')))
                 response.set_cookie('auth_token', token)
 
-                cursor.close()
-                conn.close()
                 return response
             else:
                 cursor.close()
@@ -263,6 +267,9 @@ def transfer():
             conn.commit()
             cursor.close()
             conn.close()
+
+            # Log transfer
+            log_action(session['user_id'], 'TRANSFER', None, f"Transfer {amount} from {from_account} to {to_account}")
 
             return redirect(url_for('dashboard'))
         else:
@@ -530,6 +537,69 @@ def admin_users():
     # VULNERABILITY 8: Information Disclosure - expose all user data including SSN
     return jsonify({'users': users})
 
+def log_action(user_id, action, target_user_id=None, details=None):
+    """Log admin/user action to database"""
+    try:
+        conn, cursor = get_cursor()
+        if not conn:
+            return
+
+        ip_address = request.remote_addr if request else '127.0.0.1'
+
+        cursor.execute("""
+            INSERT INTO admin_logs (admin_id, action, target_user_id, details, ip_address)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, action, target_user_id, details, ip_address))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Logging error: {e}")
+
+@app.route('/admin/logs')
+def admin_logs():
+    """Admin logs - VULNERABILITY 5: Missing Authorization"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    # VULNERABILITY 5: Missing Authorization - No role check!
+    # Any logged-in user can access admin logs
+
+    conn, cursor = get_cursor()
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 500
+
+    # Get all logs with user info
+    cursor.execute("""
+        SELECT al.id, al.action, al.details, al.ip_address, al.created_at,
+               u.username as admin_username, tu.username as target_username
+        FROM admin_logs al
+        LEFT JOIN users u ON al.admin_id = u.id
+        LEFT JOIN users tu ON al.target_user_id = tu.id
+        ORDER BY al.created_at DESC
+        LIMIT 100
+    """)
+    logs = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # Format logs for JSON response
+    formatted_logs = []
+    for log in logs:
+        formatted_logs.append({
+            'id': log['id'],
+            'timestamp': log['created_at'].strftime('%Y-%m-%d %H:%M:%S') if log['created_at'] else None,
+            'action': log['action'],
+            'user': log['admin_username'],
+            'target_user': log['target_username'],
+            'details': log['details'],
+            'ip': log['ip_address']
+        })
+
+    return jsonify({'logs': formatted_logs})
+
 @app.route('/admin/update_balance', methods=['POST'])
 def admin_update_balance():
     """Update user balance - VULNERABILITY 5 & 7: Missing Authorization + CSRF"""
@@ -551,6 +621,9 @@ def admin_update_balance():
 
     cursor.close()
     conn.close()
+
+    # Log balance update
+    log_action(session['user_id'], 'BALANCE_UPDATE', None, f"Updated balance for {account_number} to {new_balance}")
 
     return jsonify({'success': True, 'message': 'Balance updated'})
 
