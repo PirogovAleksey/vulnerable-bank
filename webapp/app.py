@@ -272,9 +272,9 @@ def transfer():
 
     return render_template('transfer.html')
 
-@app.route('/account/<int:account_id>')
+@app.route('/account/<account_id>')
 def view_account(account_id):
-    """View account details - VULNERABILITY 3: IDOR"""
+    """View account details - VULNERABILITY 3: IDOR + SQL Injection"""
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
 
@@ -285,26 +285,44 @@ def view_account(account_id):
     # VULNERABILITY 3: IDOR - No authorization check!
     # Any logged-in user can view ANY account
     cursor.execute(f"SELECT * FROM users WHERE id={account_id}")
-    account = cursor.fetchone()
-
-    if account:
-        # VULNERABILITY 8: Information Disclosure - expose sensitive data
-        cursor.close()
-        conn.close()
-        return jsonify({
-            'id': account['id'],
-            'username': account['username'],
-            'email': account['email'],
-            'account_number': account['account_number'],
-            'balance': float(account['balance']),
-            'ssn': account['ssn'],  # Exposing SSN!
-            'phone': account['phone'],
-            'address': account['address'],
-            'role': account['role']
-        })
+    accounts = cursor.fetchall()  # Fetch all results for UNION injection
 
     cursor.close()
     conn.close()
+
+    if accounts:
+        # VULNERABILITY 8: Information Disclosure - expose sensitive data
+        # Return all accounts for UNION-based SQL injection demonstration
+        if len(accounts) == 1:
+            account = accounts[0]
+            return jsonify({
+                'id': account['id'],
+                'username': account['username'],
+                'email': account['email'],
+                'account_number': account['account_number'],
+                'balance': float(account['balance']),
+                'ssn': account['ssn'],  # Exposing SSN!
+                'phone': account['phone'],
+                'address': account['address'],
+                'role': account['role']
+            })
+        else:
+            # Multiple results from UNION injection - return all
+            results = []
+            for account in accounts:
+                results.append({
+                    'id': account['id'],
+                    'username': account['username'],
+                    'email': account['email'],
+                    'account_number': account['account_number'],
+                    'balance': float(account['balance']),
+                    'ssn': account['ssn'],
+                    'phone': account['phone'],
+                    'address': account['address'],
+                    'role': account['role']
+                })
+            return jsonify(results)
+
     return jsonify({'error': 'Account not found'}), 404
 
 @app.route('/search')

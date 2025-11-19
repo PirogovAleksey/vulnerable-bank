@@ -4,6 +4,10 @@
 CREATE DATABASE IF NOT EXISTS vulnerable_bank CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE vulnerable_bank;
 
+-- Set UTF-8 encoding for proper Ukrainian text support
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 -- Users table with plain text passwords (VULNERABILITY)
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
